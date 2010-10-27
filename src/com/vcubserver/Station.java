@@ -102,7 +102,11 @@ public class Station {
 	}
 
 	public void setOpen(boolean isOpen) {
-		this.isOpen = isOpen;
+		if((this.isOpen = isOpen) == false) {
+			setAvailableBikes(0);
+			setFreeSlots(0);
+		}
+		
 	}
 	
 	public String getNetwork() {
