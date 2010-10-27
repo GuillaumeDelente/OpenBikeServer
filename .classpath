@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="lib" path="/home/guitou/workspace/restlet-gae-2.1snapshot/lib/org.restlet.jar"/>
+	<classpathentry kind="lib" path="/home/guitou/workspace/restlet-gae-2.1snapshot/lib/org.restlet.ext.servlet.jar"/>
+	<classpathentry kind="lib" path="/home/guitou/workspace/restlet-gae-2.1snapshot/lib/org.restlet.ext.jackson.jar"/>
+	<classpathentry kind="lib" path="/home/guitou/workspace/restlet-gae-2.1snapshot/lib/org.codehaus.jackson_1.4/org.codehaus.jackson.core.jar"/>
+	<classpathentry kind="lib" path="/home/guitou/workspace/restlet-gae-2.1snapshot/lib/org.codehaus.jackson_1.4/org.codehaus.jackson.mapper.jar"/>
+	<classpathentry kind="output" path="war/WEB-INF/classes"/>
+</classpath>
