@@ -13,13 +13,16 @@ import org.restlet.resource.ServerResource;
 public class StationServerResource extends ServerResource {
 
 	@Get("json")
-	public Station toJson() throws ResourceException {
+	public Station[] toJson() throws ResourceException {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		Station station;
+		String[] station_ids_str = getRequestAttributes().get("station").toString().split("\\+");
+		int size = station_ids_str.length;
+		Station[] stations = new Station[size];
 		try {
-			station = pm.getObjectById(Station.class,
-					Long.parseLong(getRequestAttributes().get("station")
-							.toString()));
+			for (int i = 0; i < size; i++) {
+				stations[i] = pm.getObjectById(Station.class,
+						Long.parseLong(station_ids_str[i]));
+			}
 		} catch (Exception e) {
 			String msg = "Cannot get JSON representation";
 			throw new ResourceException(Status.SERVER_ERROR_INTERNAL, msg, e);
@@ -28,7 +31,7 @@ public class StationServerResource extends ServerResource {
 		finally {
 			pm.close();
 		}
-		return station;
+		return stations;
 	}
 /*
 	@Get("xml")
