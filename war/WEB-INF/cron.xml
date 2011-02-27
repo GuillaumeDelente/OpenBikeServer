@@ -1,15 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <cronentries>
-  <!--
   <cron>
-    <url>/update_vcub</url>
+    <url>/internal/update</url>
     <description>Update Vcub Stations</description>
     <schedule>every 1 minutes</schedule>
   </cron>
-  <cron>
-      <url>/update_vcub_replace</url>
-    <description>Update Vcub Stations</description>
-    <schedule>every 1 minutes</schedule>
-  </cron>
-  -->
 </cronentries>

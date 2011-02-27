@@ -1,4 +1,4 @@
-package com.vcubserver;
+package fr.openbike;
 
 import java.io.IOException;
 import java.util.List;
@@ -13,11 +13,8 @@ public class DeleteDb extends HttpServlet {
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-	    String query = "SELECT FROM " + Benchmark.class.getName();
+	    String query = "SELECT FROM " + Station.class.getName();
 	    List<Long> result = (List<Long>) pm.newQuery(query).execute();
-	    pm.deletePersistentAll(result);
-	    query = "SELECT FROM " + Station.class.getName();
-	    result = (List<Long>) pm.newQuery(query).execute();
 	    pm.deletePersistentAll(result);
 	    pm.close();
 	}

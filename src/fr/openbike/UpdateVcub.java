@@ -1,4 +1,4 @@
-package com.vcubserver;
+package fr.openbike;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -32,6 +32,7 @@ public class UpdateVcub extends HttpServlet {
 	 * Retrieve the whole list of Vcub Stations from the web.
 	 */
 	private static final long serialVersionUID = -1457525909708913828L;
+	private static final String URL = "http://www.vcub.fr/stations/plan";
 	String NETWORK = "Vcub";
 
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -46,10 +47,7 @@ public class UpdateVcub extends HttpServlet {
 		long startTime = System.currentTimeMillis();
 		process(req, resp);
 		long endTime = System.currentTimeMillis();
-		PersistenceManager pm = PMF.get().getPersistenceManager();
 		long t = (endTime - startTime);
-		pm.makePersistent(new Benchmark(t, "parse"));
-		pm.close();
 		resp.getWriter().println("Temps d'execution regexp : " + t);
 	}
 
@@ -59,7 +57,7 @@ public class UpdateVcub extends HttpServlet {
 		// Send a GET request to the page
 		try {
 			// Send data
-			URL url = new URL("http://www.vcub.fr/stations/plan");
+			URL url = new URL(URL);
 			String line;
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn
@@ -83,12 +81,12 @@ public class UpdateVcub extends HttpServlet {
 			e.printStackTrace();
 		}
 		int i = parseSlotsOnly(result.toString());
-		// String a = parseStations(result);
+		//String a = parseSlotsOnly(result.toString());
 		resp.setContentType("text/plain");
 		resp.getWriter().println(
 				"La mise à jour de " + i
 						+ " stations à été correctement effectuée !");
-		// resp.getWriter().println(a);
+		//resp.getWriter().println(a);
 	}
 
 	public static String sendGetRequest() {
@@ -97,7 +95,7 @@ public class UpdateVcub extends HttpServlet {
 		try {
 
 			// Send data
-			URL url = new URL("http://www.vcub.fr/stations/plan");
+			URL url = new URL(URL);
 
 			// Get response
 			BufferedReader reader = new BufferedReader(new InputStreamReader(
@@ -130,10 +128,13 @@ public class UpdateVcub extends HttpServlet {
 		toParse = toParse.replaceAll("\\\\x3e", ">");
 		toParse = toParse.replaceAll("(\\\\')|(\\\\)?\"", "'");
 		
+		//return parseAllStations(toParse);
+		
 		/* Retrieve our Stations from DB into a HashTable */
+		
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		Extent<Station> extent = pm.getExtent(Station.class);
-		Hashtable<Long, Station> stations = new Hashtable<Long, Station>(139);
+		Hashtable<Long, Station> stations = new Hashtable<Long, Station>();
 		Iterator<Station> it = extent.iterator();
 		if (it.hasNext()) {
 			while (it.hasNext()) {
@@ -141,12 +142,11 @@ public class UpdateVcub extends HttpServlet {
 				stations.put(s.getId(), s);
 			}
 		} else {
-			/* Our db is empty, let's fill it*/
+			// Our db is empty, let's fill it
 			extent.closeAll();
 			pm.close();
 			return parseAllStations(toParse);
 		}
-
 		//System.out.println(toParse);
 		p = Pattern
 				.compile("#(\\d+)[^}]*(?:(?:<strong>(\\d+)</strong>[^}]*<strong>(\\d+)</strong>)|maintenance)");
@@ -156,8 +156,8 @@ public class UpdateVcub extends HttpServlet {
 			// " " + m.group(3));
 			Station s = stations.get(Long.parseLong(m.group(1)));
 			if (s == null) {
-				/* Vcub Station List has changed, we
-				 * reload the whole list */
+				// Vcub Station List has changed, we
+				// reload the whole list
 				extent.closeAll();
 				pm.close();
 				return parseAllStations(toParse);
@@ -172,20 +172,20 @@ public class UpdateVcub extends HttpServlet {
 		}
 		extent.closeAll();
 		pm.close();
+		//return "";
 		return stations.size();
 	}
 	
 	public static int parseAllStations(String toParse) {
-
-		Pattern p = Pattern.compile("'latitude': '([^']*)', 'longitude': '([^']*)'[^#]*#(\\d*) - ([^<]*)</div>[^<]*<div class='gmap-adresse'>([^<]*)</div>(<div class='gmap-velos'>.*?<strong>(\\d+)</strong>.*?<strong>(\\d+)</strong>)?");
+		Pattern p = Pattern.compile("'latitude': '([^']*)', 'longitude': '([^']*)'[^#]*#(\\d*) - ([^<]*)</div>[^<]*<div class='gmap-adresse'>([^<]*)</div>(<div class='gmap-velos'>.*?<strong>(\\d+)</strong>.*?<strong>(\\d+)</strong>([^<]*</td><td><acronym title='Carte Bancaire'>CB</acronym></td>)?)?");
 		Matcher m = p.matcher(toParse);
-		//FIXME : Size of the Vector
-		Vector<Station> stations = new Vector<Station>(139);
+		Vector<Station> stations = new Vector<Station>();
+		//String a = "";
 		while (m.find()) {
-			//System.out.println("Count -> " + m.groupCount());
 			Station s = new Station();
 			s.setNetwork("Vcub");
 			s.setId(Long.parseLong(m.group(3)));
+			//a += Long.parseLong(m.group(3));
 			s.setName(m.group(4));
 			s.setAddress(m.group(5).toLowerCase());
 			s.setLatitude(Double.parseDouble(m.group(1)));
@@ -193,7 +193,9 @@ public class UpdateVcub extends HttpServlet {
 			if (m.group(7) != null) {
 				s.setAvailableBikes(Integer.parseInt(m.group(7)));
 				s.setFreeSlots(Integer.parseInt(m.group(8)));
+				s.setPayment(m.group(9) != null);
 				s.setOpen(true);
+				//a += m.group(9) + "\n ";
 			} else {
 				s.setOpen(false);
 			}
@@ -202,6 +204,7 @@ public class UpdateVcub extends HttpServlet {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		pm.makePersistentAll(stations);
 		pm.close();
+		//return "Result : " + a;
 		return stations.size();
 	}
 }

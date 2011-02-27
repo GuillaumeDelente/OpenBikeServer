@@ -1,0 +1,20 @@
+application: OpenBikeServer
+version: 1
+runtime: java
+
+handlers:
+ - url: /internal/update
+   login: admin
+   servlet: fr.openbike.UpdateVcub
+   name: update
+     
+ - url: /internal/clean
+   login: admin
+   servlet: fr.openbike.DeleteDb
+   name: clean
+     
+ - url: /*
+   servlet: org.restlet.ext.servlet.ServerServlet
+   name: OpenBikeServer
+   init_params:
+    org.restlet.application: fr.openbike.OpenBikeServer

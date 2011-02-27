@@ -1,4 +1,4 @@
-package com.vcubserver;
+package fr.openbike;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.vcubserver;
+package fr.openbike;
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManagerFactory;
 

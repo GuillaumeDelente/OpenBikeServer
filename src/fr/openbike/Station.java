@@ -1,4 +1,4 @@
-package com.vcubserver;
+package fr.openbike;
 
 import javax.jdo.annotations.IdGeneratorStrategy;
 import javax.jdo.annotations.PersistenceCapable;
@@ -32,8 +32,12 @@ public class Station {
 	private int freeSlots;
 	@Persistent
 	boolean isOpen;
+	@Persistent
+	boolean isPayment;
 
-	Station(long id, String network, String name, String address, double longitude, double latitude, int availablesBikes, int freeLocations, boolean isOpen) {
+	Station(long id, String network, String name, String address, 
+			double longitude, double latitude, int availablesBikes, 
+			int freeLocations, boolean isOpen, boolean hasPayment) {
 		this.id = (long) id;
 		this.network = network;
 		this.address = address;
@@ -43,6 +47,7 @@ public class Station {
 		this.availableBikes = availablesBikes;
 		this.freeSlots = freeLocations;
 		this.isOpen = isOpen;
+		this.isPayment = hasPayment;
 	}
 
 	public Station() {
@@ -105,6 +110,7 @@ public class Station {
 		if((this.isOpen = isOpen) == false) {
 			setAvailableBikes(0);
 			setFreeSlots(0);
+			setPayment(false);
 		}
 		
 	}
@@ -123,5 +129,13 @@ public class Station {
 
 	public Long getId() {
 		return id;
+	}
+	
+	public boolean isPayment() {
+		return isPayment;
+	}
+	
+	public void setPayment(boolean payment) {
+		this.isPayment = payment;
 	}
 }

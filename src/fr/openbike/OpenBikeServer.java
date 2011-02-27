@@ -1,10 +1,10 @@
-package com.vcubserver;
+package fr.openbike;
 
 import org.restlet.Application;
 import org.restlet.Restlet;
 import org.restlet.routing.Router;
  
-public class VcubServer extends Application {
+public class OpenBikeServer extends Application {
  
     /**
      * Creates a root Restlet that will receive all incoming calls.
