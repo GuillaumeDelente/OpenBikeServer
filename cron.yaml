@@ -1,0 +1,8 @@
+cron:
+- description: update station availability
+  url: /private/update
+  schedule: every 2 minutes
+
+- description: update open, closed and new stations
+  url: /private/updateList
+  schedule: every 5 minutes
