@@ -61,8 +61,8 @@ class FetchStations(webapp.RequestHandler):
                 rpcs.append(rpc)
             for rpc in rpcs:
                 rpc.wait()
-        except urlfetch.DownloadError:
             memcache.set('stations', stations)
+        except urlfetch.DownloadError:
             logging.error('Time out fetching stations')
             self.error(500)
             return
