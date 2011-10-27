@@ -19,7 +19,7 @@ class Update(webapp.RequestHandler):
             network = get_network_from_datastore()
 	update_url = network.update_url
 	for i in range(0, to):
-		taskqueue.add(queue_name='fetchStationsQueue', 
+		taskqueue.add(queue_name='fetchQueue', 
 			      url='/queue/fetchStations', 
 			      params={'update_ids': '-'.join(str(id) for id in keys[i*10:i*10+10]), 'update_url': update_url},
 			      method='POST')
