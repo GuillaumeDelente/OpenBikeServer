@@ -1,0 +1,32 @@
+application: openbikeserver-5
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+
+- url: /private/*
+  script: main.py
+  login: admin
+
+- url: /queue/*
+  script: main.py
+  login: admin
+
+- url: /admin/.*
+  script: $PYTHON_LIB/google/appengine/ext/admin
+  login: admin
+
+- url: /.*
+  script: main.py
+
+admin_console:
+  pages:
+  - name: My Console
+    url: /admin/interactive
+  - name: My Memcache
+    url: /admin/memcache
+  - name: My XMPP
+    url: /admin/xmpp
+  - name: My Inbound Mail
+    url: /admin/inboundmail
