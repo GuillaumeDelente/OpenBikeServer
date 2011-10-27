@@ -13,11 +13,13 @@ class FetchStations(webapp.RequestHandler):
             if result.status_code == 200:
                 update_station(id, result.content)
             elif result.status_code == 403:
+                logging.error('403 fetching station')
                 mail.send_mail("bug@" + app_identity.get_application_id() + ".appspotmail.com",
                                to="contact@openbike.fr",
                                subject="Access denied",
                                body="Access denied for app " + app_identity.get_application_id())
             else:
+                logging.error(str(result.status_code) + ' fetching station')
                 logging.error('Unable to reach webservice ' 
                               + str(result.status_code) 
                               + ' for content : ' 
@@ -38,6 +40,7 @@ class FetchStations(webapp.RequestHandler):
                 to_update.freeSlots = int(parsed_station.free.string)
                 to_update.payment = bool(int(parsed_station.ticket.string))   
             except:
+                logging.error('error parsing station with content ' + content)
                 mail.send_mail("bug@" + app_identity.get_application_id() + ".appspotmail.com",
                                to="contact@openbike.fr",
                                subject="Parsing Error",
