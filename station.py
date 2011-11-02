@@ -42,5 +42,6 @@ def get_stations():
         stations = Station.all().fetch(count)
         stations = dict([(station.id, station) for station in stations])
         memcache.set('stations', stations)
+        return stations
     else:
         return None

@@ -1,69 +1,83 @@
 from google.appengine.ext import webapp
 from google.appengine.api import memcache, urlfetch, mail, users, app_identity
 from google.appengine.ext.webapp.util import run_wsgi_app
+from django.utils import simplejson
 from BeautifulSoup import *
-import logging
+import logging, re
 from station import *
+
 
 class FetchStations(webapp.RequestHandler):
 
-    def post(self):
-        def handle_result(rpc, id):
-            result = rpc.get_result()
-            if result.status_code == 200:
-                update_station(id, result.content)
-            elif result.status_code == 403:
-                logging.error('403 fetching station')
-                mail.send_mail("bug@" + app_identity.get_application_id() + ".appspotmail.com",
-                               to="contact@openbike.fr",
-                               subject="Access denied",
-                               body="Access denied for app " + app_identity.get_application_id())
-            else:
-                logging.error(str(result.status_code) + ' fetching station')
-                logging.error('Unable to reach webservice ' 
-                              + str(result.status_code) 
-                              + ' for content : ' 
-                              + result.content 
-                              + ' for station ' 
-                              + id)
-
-	# Use a helper function to define the scope of the callback.
-        def create_callback(rpc, id):
-            return lambda: handle_result(rpc, id)
-
-	def update_station(id, content):
-            soup = BeautifulStoneSoup(content)
-            try:
-                parsed_station = soup.station
-                to_update = stations[int(id)]
-                to_update.availableBikes = int(parsed_station.available.string)
-                to_update.freeSlots = int(parsed_station.free.string)
-                to_update.payment = bool(int(parsed_station.ticket.string))   
-            except:
-                logging.error('error parsing station with content ' + content)
-                mail.send_mail("bug@" + app_identity.get_application_id() + ".appspotmail.com",
-                               to="contact@openbike.fr",
-                               subject="Parsing Error",
-                               body='Error while parsing ' + id + ' with content ' + content)
-
-        url = self.request.get('update_url')
-        update_ids = [id for id in self.request.get('update_ids').split('-')]
-	stations = get_stations()
-        #Should not append as we check before launching update
-        if stations is None:
-            return
-	rpcs = []
+    def get(self):
         try:
-            for id in update_ids:
-                rpc = urlfetch.create_rpc(deadline = 10)
-                rpc.callback = create_callback(rpc, id)
-                urlfetch.make_fetch_call(rpc, url + '/' + id)
-                rpcs.append(rpc)
-            for rpc in rpcs:
-                rpc.wait()
+#            result = urlfetch.fetch('http://www.vcub.fr/stations/plan', deadline = 10)
+            result = urlfetch.fetch('http://openbike.fr/vcub.html', deadline = 10)
         except urlfetch.DownloadError:
-            memcache.set('stations', stations)
-            logging.error('Time out fetching stations')
+            logging.error('Timeout')
             self.error(500)
             return
+        if result.status_code != 200:
+            logging.error(
+                'Unable to reach list webservice, error '
+                + str(result.status_code))
+            self.error(500)
+            return
+        pattern = re.compile('\"markers\": (\[.*\])')
+        match = pattern.search(result.content)
+        result = match.group(1).decode('utf8').replace(u'\\x3e', '')
+        result = result.replace(u'\\x3c', '')
+        result = result.replace(u'\\\'', '\'')
+        json_stations = simplejson.loads(result)
+        stations = get_stations()
+        new_stations = []
+        parsed_ids = set()
+        if stations is None:
+            stations = {}
+        for json_station in json_stations:
+            text = json_station.get('text')
+            id = int(re.compile('#(\d+)').search(text).group(1))
+            parsed_ids.add(id)
+            slots_search = re.compile('strong(\d+)/strong p').search(text)
+            open = True
+            if slots_search is not None:
+                slots = int(slots_search.group(1))
+                bikes = int(re.compile('strong(\d+)/strong v').search(text).group(1))
+            else:
+                open = False
+            station = stations.get(id)
+            if station is not None:
+                logging.error(station)
+                station.open = open
+                station.freeSlots = slots
+                station.availableBikes = bikes
+            else:
+                cb = True
+                if re.compile('title=\"Carte Bancaire\"').search(text) is None:
+                    cb = False
+                special = False
+                if re.compile('vcub\+').search(json_station.get('markername')) is not None:
+                    special = True
+                new_station = Station(id = id, 
+                        name = re.compile('#\d+ *- *(.+)/div').search(text).group(1),
+                        address = re.compile('\"gmap-adresse\"(.+)/div').search(text).group(1).title(),
+                        open = open,
+                        payment = cb,
+                        special = special,
+                        network = 1,
+                        latitude = float(json_station.get('latitude')),
+                        longitude = float(json_station.get('longitude')),
+                        availableBikes = bikes,
+                        freeSlots = slots)
+                new_stations.append(new_station)
+                stations[id] = new_station
+        if len(new_stations) != 0:
+            logging.error('saving to db')
+            db.put(new_stations)
+        to_remove = set(stations.keys()).difference(parsed_ids)
+        for id in to_remove:
+            station = stations.pop(id)
+            logging.error('removing id ' + str(id) + ' is saved ' + str(station.is_saved()))
+            station.delete()
+        memcache.set('stations', stations)
         self.response.out.write("<html><body><p>OK</p></body></html>")

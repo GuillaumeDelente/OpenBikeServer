@@ -8,19 +8,7 @@ from station import *
 class Update(webapp.RequestHandler):
 
     def get(self):
-        stations = get_stations()
-        if stations is None:
-            return
-        keys = stations.keys()
-        count = len(keys)
-	to = int(math.floor(count / 10)) + 1
-        network = memcache.get('network')
-        if network is None:
-            network = get_network_from_datastore()
-	update_url = network.update_url
-	for i in range(0, to):
-		taskqueue.add(queue_name='fetchQueue', 
-			      url='/queue/fetchStations', 
-			      params={'update_ids': '-'.join(str(id) for id in keys[i*10:i*10+10]), 'update_url': update_url},
-			      method='POST')
+        taskqueue.add(queue_name='fetchQueue', 
+                      url='/queue/fetchStations',
+                      method='GET')
         self.response.out.write("<html><body><p>Ok</p></body></html>")
