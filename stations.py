@@ -4,7 +4,7 @@ from google.appengine.ext import webapp
 from django.utils import simplejson
 from google.appengine.api import memcache
 from google.appengine.ext.webapp.util import run_wsgi_app
-from network import *
+from status import *
 from station import *
 
 class Stations(webapp.RequestHandler):
@@ -21,11 +21,9 @@ class Stations(webapp.RequestHandler):
                 self.response.out.write(json)
                 return
             else:
-                network = memcache.get('network')
-                if network is None:
-                    network = get_network_from_datastore()
-                message = network.message
-                response = ["{\"version\": ", str(network.data_version), ", "]
+                status = memcache.get('status')
+                message = status.message
+                response = ["{\"version\": ", str(status.data_version), ", "]
                 if len(message) != 0:
                     response.append("\"message\": \"")
                     response.append(message)

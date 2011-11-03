@@ -1,6 +1,9 @@
 queue:  
 - name: fetchQueue
-  rate: 1/s
+  rate: 30/m
   max_concurrent_requests: 1
   retry_parameters:
+    # task will stop retrying only when both limits are reached
+    # in our case we prevent tasks from retrying by throwing 
+    # a deferred exception
     task_retry_limit: 1

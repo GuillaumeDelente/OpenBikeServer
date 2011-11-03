@@ -4,8 +4,12 @@ from update import *
 from stations import *
 from fetchStations import *
 from networks import *
+from addNetwork import *
+from setMessage import *
 
 application = webapp.WSGIApplication([('/private/update', Update),
+                                      ('/private/addNetwork', AddNetwork),
+                                      ('/private/setMessage', SetMessage),
                                       ('/queue/fetchStations', FetchStations),
                                       ('^/networks/?$', Networks),
                                       ('^/stations/?$', Stations),

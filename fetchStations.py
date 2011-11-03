@@ -1,4 +1,5 @@
 from google.appengine.ext import webapp
+from google.appengine.ext.deferred.deferred import PermanentTaskFailure
 from google.appengine.api import memcache, urlfetch, mail, users, app_identity
 from google.appengine.ext.webapp.util import run_wsgi_app
 from django.utils import simplejson
@@ -6,22 +7,21 @@ from BeautifulSoup import *
 import logging, re
 from station import *
 
-
 class FetchStations(webapp.RequestHandler):
 
     def get(self):
+        logging.error('Task begin')
         try:
-#            result = urlfetch.fetch('http://www.vcub.fr/stations/plan', deadline = 10)
-            result = urlfetch.fetch('http://openbike.fr/vcub.html', deadline = 10)
+            result = urlfetch.fetch('http://www.vcub.fr/stations/plan', deadline = 10)
         except urlfetch.DownloadError:
             logging.error('Timeout')
-            self.error(500)
+            self.error(200)
             return
         if result.status_code != 200:
             logging.error(
                 'Unable to reach list webservice, error '
                 + str(result.status_code))
-            self.error(500)
+            self.error(200)
             return
         pattern = re.compile('\"markers\": (\[.*\])')
         match = pattern.search(result.content)
