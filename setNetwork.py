@@ -7,7 +7,7 @@ from network import *
 class SetNetwork(webapp.RequestHandler):
 
     def get(self):
-        if Network.all(keys_only = True).count() != 0:
+        if get_network() is not None:
             self.response.out.write('There already is a network for this server !')
         else:
             self.response.out.write("""
@@ -28,9 +28,3 @@ class SetNetwork(webapp.RequestHandler):
            self.response.out.write('Network set')
        except:
            self.response.out.write('Error setting network')
-
-def get_network_from_datastore():
-    network = db.GqlQuery("SELECT * "
-                              "FROM network")
-    memcache.set('network', network)
-    return network

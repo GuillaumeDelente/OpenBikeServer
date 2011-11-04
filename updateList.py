@@ -5,9 +5,11 @@ from network import *
 class UpdateList(webapp.RequestHandler):
 
     def get(self):
-        network = memcache.get('network')
+        network = get_network()
         if network is None:
-            network = get_network_from_datastore()
+            logging.error('No network')
+            self.error(500)
+            return
         taskqueue.add(queue_name='fetchQueue', 
                       url='/queue/fetchStationList', 
                       params={'url': network.list_url, 'id': network.id})

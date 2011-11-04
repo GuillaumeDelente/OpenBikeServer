@@ -21,9 +21,7 @@ class Stations(webapp.RequestHandler):
                 self.response.out.write(json)
                 return
             else:
-                network = memcache.get('network')
-                if network is None:
-                    network = get_network_from_datastore()
+                network = get_network()
                 message = network.message
                 response = ["{\"version\": ", str(network.data_version), ", "]
                 if len(message) != 0:
