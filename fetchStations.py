@@ -47,7 +47,6 @@ class FetchStations(webapp.RequestHandler):
                 open = False
             station = stations.get(id)
             if station is not None:
-                logging.error(station)
                 station.open = open
                 station.freeSlots = slots
                 station.availableBikes = bikes
@@ -72,12 +71,10 @@ class FetchStations(webapp.RequestHandler):
                 new_stations.append(new_station)
                 stations[id] = new_station
         if len(new_stations) != 0:
-            logging.error('saving to db')
             db.put(new_stations)
         to_remove = set(stations.keys()).difference(parsed_ids)
         for id in to_remove:
             station = stations.pop(id)
-            logging.error('removing id ' + str(id) + ' is saved ' + str(station.is_saved()))
             station.delete()
         memcache.set('stations', stations)
         self.response.out.write("<html><body><p>OK</p></body></html>")

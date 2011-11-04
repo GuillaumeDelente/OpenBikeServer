@@ -21,7 +21,7 @@ class Stations(webapp.RequestHandler):
                 self.response.out.write(json)
                 return
             else:
-                status = memcache.get('status')
+                status = get_status()
                 message = status.message
                 response = ["{\"version\": ", str(status.data_version), ", "]
                 if len(message) != 0:

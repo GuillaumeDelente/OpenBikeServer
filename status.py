@@ -17,12 +17,11 @@ class Status(db.Model):
 def get_status():
     status = memcache.get('status')
     if status is None:
-        status = Status.all().fetch(1)
-        if len(status) == 0:
+        status = Status.all().get()
+        if status is None:
             status = Status(data_version=0)
             status.put()
             memcache.set('status', status)
-            return status            
-        return status[0]
+        return status
     else:
         return status
