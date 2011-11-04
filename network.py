@@ -23,7 +23,7 @@ class Network(db.Model):
 def get_networks():
     networks = memcache.get('networks')
     if networks is None:
-        networks = Network.all().fetch(100)
+        networks = Network.all().order('city').fetch(100)
         json = simplejson.dumps(
             [network.to_dict() for network in networks])
         memcache.set('networks', json)
