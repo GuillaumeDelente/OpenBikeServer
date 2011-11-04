@@ -10,7 +10,6 @@ from station import *
 class FetchStations(webapp.RequestHandler):
 
     def get(self):
-        logging.error('Task begin')
         try:
             result = urlfetch.fetch('http://www.vcub.fr/stations/plan', deadline = 10)
         except urlfetch.DownloadError:
