@@ -10,7 +10,7 @@ class SetMessage(webapp.RequestHandler):
         status = get_status()
         self.response.out.write('''
           <form action="/private/setMessage" method="post">
-            <div>Message : <input type="text" name="id" value="'''
+            <div>Message : <input type="text" name="message" value="'''
                                 + status.message + '''"
                                 /></div>
             <div><input type="submit" value="Save"></div>

@@ -22,7 +22,7 @@ def get_status():
             status = Status(data_version=0)
             status.put()
             memcache.set('status', status)
-            logging.error('Status put')
-        return status
+            return status            
+        return status[0]
     else:
         return status
