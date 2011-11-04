@@ -14,9 +14,7 @@ class Update(webapp.RequestHandler):
         keys = stations.keys()
         count = len(keys)
 	to = int(math.floor(count / 10)) + 1
-        network = memcache.get('network')
-        if network is None:
-            network = get_network_from_datastore()
+        network = get_network()
 	update_url = network.update_url
 	for i in range(0, to):
 		taskqueue.add(queue_name='fetchQueue', 
