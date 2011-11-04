@@ -1,5 +1,5 @@
-application: openbikeserver-5
-version: 1
+application: openbikeserver
+version: 2
 runtime: python
 api_version: 1
 
