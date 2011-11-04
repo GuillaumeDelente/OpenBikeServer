@@ -14,13 +14,17 @@ class FetchStationList(webapp.RequestHandler):
             result = urlfetch.fetch(url, deadline = 10)
         except urlfetch.DownloadError:
             logging.error('Timeout for list update')
-            self.error(500)
+            self.error(200)
             return
 	if result.status_code != 200:
             logging.error(
                 'Unable to reach list webservice, error '
                 + str(result.status_code))
-            self.error(500)
+            mail.send_mail("bug@" + app_identity.get_application_id() + ".appspotmail.com",
+                           to="contact@openbike.fr",
+                           subject="Station list acces",
+                           body="Error " + str(result.status_code) + ' for ' + app_identity.get_application_id())
+            self.error(200)
             return
 	soup = BeautifulStoneSoup(result.content)
         new_ids = set()
@@ -35,29 +39,35 @@ class FetchStationList(webapp.RequestHandler):
         version_upgrade = False
 	#inserting
         new_stations = []
-        for marker in soup.carto.markers.findAll('marker'):
-            parsed_id = int(marker['number'])
-            new_ids.add(parsed_id)
-            if force_update or (parsed_id not in old_ids):
-                version_upgrade = True
-                station = (Station(availableBikes = 0, 
-                                        freeSlots = 0, 
-                                        network = network_id, 
-                                        name = re.compile('[^a-zA-Z]*(.*)').match(marker['name']).group(1).title(),
-                                        id = parsed_id, 
-                                        address = marker['address'].title(), 
-                                        longitude = float(marker['lng']), 
-                                        latitude = float(marker['lat']), 
-                                        open = True, 
-                                        payment = False, 
-                                        special = bool(int(marker['bonus']))))
+        try:
+            for marker in soup.carto.markers.findAll('marker'):
+                parsed_id = int(marker['number'])
+                new_ids.add(parsed_id)
+                if force_update or (parsed_id not in old_ids):
+                    version_upgrade = True
+                    station = (Station(availableBikes = 0, 
+                                       freeSlots = 0, 
+                                       network = network_id, 
+                                       name = re.compile('[^a-zA-Z]*(.*)').match(marker['name']).group(1).title(),
+                                       id = parsed_id, 
+                                       address = marker['address'].title(), 
+                                       longitude = float(marker['lng']), 
+                                       latitude = float(marker['lat']), 
+                                       open = True, 
+                                       payment = False, 
+                                       special = bool(int(marker['bonus']))))
                 #Add to cache
-                stations[parsed_id] = station
+                    stations[parsed_id] = station
                 #Collect new stations for datastore
-                new_stations.append(station)
-            else:
-                stations[parsed_id].open = True
-	#closed stations
+                    new_stations.append(station)
+                else:
+                    stations[parsed_id].open = True
+        except:
+            mail.send_mail("bug@" + app_identity.get_application_id() + ".appspotmail.com",
+                           to="contact@openbike.fr",
+                           subject="Station list acces",
+                           body="Error " + str(result.status_code) + ' for ' + app_identity.get_application_id())            
+        #closed stations
         closed_ids = old_ids.difference(new_ids)
         for closed_id in closed_ids:
             stations[closed_id].open = False
@@ -67,7 +77,7 @@ class FetchStationList(webapp.RequestHandler):
 
 	if version_upgrade:
 	#increment data version
-            network = Network.all()[0]
+            network = Network.all().get()
             network.data_version += 1
             network.put()
             memcache.set('network', network)

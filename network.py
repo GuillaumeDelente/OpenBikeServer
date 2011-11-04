@@ -13,9 +13,12 @@ def get_network():
     network = memcache.get('network')
     logging.error('Network : ' + str(network))
     if network is None:
-        network = Network.all().fetch(1)
-        if len(network) == 0:
+        network = Network.all().get()
+        if network is None:
+            logging.error('lenth 0')
             return None
-        memcache.set('network', network[0])
+        logging.error('lenth not null')
+        logging.error(str(network))
+        memcache.set('network', network)
     return network
     
