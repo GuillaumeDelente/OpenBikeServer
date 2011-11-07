@@ -1,6 +1,5 @@
 from google.appengine.ext import db
 from google.appengine.api import users, memcache
-import logging
 
 class Network(db.Model):
     id = db.IntegerProperty(required=True)
@@ -11,14 +10,10 @@ class Network(db.Model):
 
 def get_network():
     network = memcache.get('network')
-    logging.error('Network : ' + str(network))
     if network is None:
         network = Network.all().get()
         if network is None:
-            logging.error('lenth 0')
             return None
-        logging.error('lenth not null')
-        logging.error(str(network))
         memcache.set('network', network)
     return network
     

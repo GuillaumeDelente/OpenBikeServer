@@ -13,7 +13,7 @@ class Update(webapp.RequestHandler):
             return
         keys = stations.keys()
         count = len(keys)
-	to = int(math.floor(count / 10)) + 1
+	to = int(math.ceil(count / 10))
         network = get_network()
 	update_url = network.update_url
 	for i in range(0, to):
