@@ -33,18 +33,22 @@ class FetchStations(webapp.RequestHandler):
 
 	def update_station(id, content):
             soup = BeautifulStoneSoup(content)
-            #try:
-            parsed_station = soup.station
-            to_update = stations[int(id)]
-            to_update.availableBikes = int(parsed_station.available.string)
-            to_update.freeSlots = int(parsed_station.free.string)
-            to_update.payment = bool(int(parsed_station.ticket.string))   
-            #except:
-            #   logging.error('error parsing station with content ' + content)
-            #  mail.send_mail("bug@" + app_identity.get_application_id() + ".appspotmail.com",
-            #                to="contact@openbike.fr",
-            #               subject="Parsing Error",
-            #              body='Error while parsing ' + id + ' with content ' + content)
+            try:
+                parsed_station = soup.station
+                to_update = stations[int(id)]
+
+                to_update.availableBikes = int(parsed_station.bikes.string)
+                to_update.freeSlots = int(parsed_station.attachs.string)
+                to_update.payment = parsed_station.paiement.string == 'AVEC_TPE'
+                if len(to_update.address) == 0:
+                    to_update.address = parsed_station.adress.string.title()
+                to_update.open = parsed_station.status.string == '0'
+            except:
+                logging.error('error parsing station with content ' + content)
+                mail.send_mail("bug@" + app_identity.get_application_id() + ".appspotmail.com",
+                               to="contact@openbike.fr",
+                               subject="Parsing Error",
+                               body='Error while parsing ' + id + ' with content ' + content)
 
         url = self.request.get('update_url')
         update_ids = [id for id in self.request.get('update_ids').split('-')]
@@ -57,7 +61,7 @@ class FetchStations(webapp.RequestHandler):
             for id in update_ids:
                 rpc = urlfetch.create_rpc(deadline = 10)
                 rpc.callback = create_callback(rpc, id)
-                urlfetch.make_fetch_call(rpc, url + '/' + id)
+                urlfetch.make_fetch_call(rpc, url + id)
                 rpcs.append(rpc)
             for rpc in rpcs:
                 rpc.wait()

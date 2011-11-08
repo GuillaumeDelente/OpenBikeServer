@@ -22,7 +22,7 @@ class FetchStationList(webapp.RequestHandler):
                 + str(result.status_code))
             mail.send_mail("bug@" + app_identity.get_application_id() + ".appspotmail.com",
                            to="contact@openbike.fr",
-                           subject="Station list acces",
+                           subject="Station list access",
                            body="Error " + str(result.status_code) + ' for ' + app_identity.get_application_id())
             self.error(200)
             return
@@ -39,34 +39,31 @@ class FetchStationList(webapp.RequestHandler):
         version_upgrade = False
 	#inserting
         new_stations = []
-        try:
-            for marker in soup.carto.markers.findAll('marker'):
-                parsed_id = int(marker['number'])
-                new_ids.add(parsed_id)
-                if force_update or (parsed_id not in old_ids):
-                    version_upgrade = True
-                    station = (Station(availableBikes = 0, 
-                                       freeSlots = 0, 
-                                       network = network_id, 
-                                       name = re.compile('[^a-zA-Z]*(.*)').match(marker['name']).group(1).title(),
-                                       id = parsed_id, 
-                                       address = marker['address'].title(), 
-                                       longitude = float(marker['lng']), 
-                                       latitude = float(marker['lat']), 
-                                       open = True, 
-                                       payment = False, 
-                                       special = bool(int(marker['bonus']))))
+        #try:
+        for marker in soup.markers.findAll('marker'):
+            parsed_id = int(marker['id'])
+            new_ids.add(parsed_id)
+            if force_update or (parsed_id not in old_ids):
+                version_upgrade = True
+                station = (Station(availableBikes = 0, 
+                                   freeSlots = 0, 
+                                   network = network_id, 
+                                   name = marker['name'],
+                                   id = parsed_id,
+                                   longitude = float(marker['lng']), 
+                                   latitude = float(marker['lat']), 
+                                   open = True, 
+                                   payment = False, 
+                                   special = False))
                 #Add to cache
-                    stations[parsed_id] = station
+                stations[parsed_id] = station
                 #Collect new stations for datastore
-                    new_stations.append(station)
-                else:
-                    stations[parsed_id].open = True
-        except:
-            mail.send_mail("bug@" + app_identity.get_application_id() + ".appspotmail.com",
-                           to="contact@openbike.fr",
-                           subject="Station list acces",
-                           body="Error " + str(result.status_code) + ' for ' + app_identity.get_application_id())            
+                new_stations.append(station)
+#        except:
+#            mail.send_mail("bug@" + app_identity.get_application_id() + ".appspotmail.com",
+#                           to="contact@openbike.fr",
+#                           subject="Station list",
+#                           body="Error parsing station list content " + str(result.status_code) + ' for ' + app_identity.get_application_id())            
         #closed stations
         closed_ids = old_ids.difference(new_ids)
         for closed_id in closed_ids:
