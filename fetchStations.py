@@ -44,6 +44,8 @@ class FetchStations(webapp.RequestHandler):
                 bikes = int(re.compile('strong(\d+)/strong v').search(text).group(1))
             else:
                 open = False
+                slots = 0
+                bikes = 0
             station = stations.get(id)
             if station is not None:
                 station.open = open
