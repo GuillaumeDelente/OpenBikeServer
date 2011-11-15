@@ -9,25 +9,20 @@ from station import *
 
 class Stations(webapp.RequestHandler):
 
-    def get(self, api_version = 1, id = 0):
+    def get(self, api_version = 1, id = 0, full = False):
         stations = get_stations()
         if stations is None:
             self.response.out.write(u"{\"message\": \"Les données sont momentanément indisponible, réessayez dans quelques instants.\",\"stations\": []}")
         else:
             self.response.headers["Content-Type"] = "application/json; charset=utf-8"
-            json = simplejson.dumps(
-                [station.to_dict() for station in stations.values()])
-            if api_version == 1:
-                self.response.out.write(json)
-                return
-            else:
-                network = get_network()
-                message = network.message
-                response = ["{\"version\": ", str(network.data_version), ", "]
-                if len(message) != 0:
-                    response.append("\"message\": \"")
-                    response.append(message)
-                    response.append("\", ")
-                response.append("\"stations\": ")
-                response.append(json)
-                self.response.out.write(''.join(response))
+            network = get_network()
+            message = network.message
+            response = ["{\"version\": ", str(network.data_version), ", "]
+            if len(message) != 0:
+                response.append("\"message\": \"")
+                response.append(message)
+                response.append("\", ")
+            response.append("\"stations\": ")
+            response.append(simplejson.dumps(
+                    [station.to_dict() for station in stations.values()]))
+            self.response.out.write(''.join(response))
