@@ -3,6 +3,7 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from update import *
 from updateList import *
 from stations import *
+from stationsList import *
 from fetchStations import *
 from fetchStationList import *
 from setNetwork import *
@@ -14,10 +15,10 @@ application = webapp.WSGIApplication([('/private/update', Update),
                                       ('/private/setMessage', SetMessage),
                                       ('/queue/fetchStationList', FetchStationList),
                                       ('/queue/fetchStations', FetchStations),
-                                      ('^/stations/?$', Stations),
-                                      ('^/stations/\d+/?$', Stations),
+                                      ('^/stations/?$', StationsList),
+                                      ('^/stations/\d+/?$', StationsList),
                                       ('^/v(\d+)/stations/?$', Stations),
-                                      ('^/v(\d+)/stations/\d+/?$', Stations),],
+                                      ('^/v(\d+)/stations/list/?$', StationsList),],
                                      debug=True)
 
 def main():

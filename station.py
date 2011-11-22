@@ -16,7 +16,7 @@ class Station(db.Model):
     special = db.BooleanProperty(default=False)
     
     
-    def to_dict(self):
+    def to_full_dict(self):
         return {"id": self.id, 
                 "name": self.name,
                 "availableBikes": self.availableBikes,
@@ -27,6 +27,13 @@ class Station(db.Model):
                 "address": self.address, 
                 "payment": self.payment,
                 "special": self.special,
+                "network": self.network}
+
+    def to_dict(self):
+        return {"id": self.id, 
+                "availableBikes": self.availableBikes,
+                "freeSlots": self.freeSlots,
+                "open": self.open,
                 "network": self.network}
 
 

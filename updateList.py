@@ -1,6 +1,7 @@
 from google.appengine.ext import webapp
 from google.appengine.api import memcache, taskqueue
 from network import *
+import logging
 
 class UpdateList(webapp.RequestHandler):
 
