@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 from google.appengine.ext import webapp
 from google.appengine.api import memcache
-from network import *
+from availableNetwork import *
 
 class AddNetwork(webapp.RequestHandler):
 
     def get(self):
-        networks = get_networks()
+        networks = get_available_networks()
         self.response.out.write("""
           <form action="/private/addNetwork" method="post">
             <div>id : <input type="text" name="id" /></div>
@@ -24,14 +24,14 @@ class AddNetwork(webapp.RequestHandler):
     
     def post(self):
         try:
-            Network(id = int(self.request.get('id')),
+            AvailableNetwork(id = int(self.request.get('id')),
                     name = self.request.get('name'), 
                     city = self.request.get('city'),
                     server = self.request.get('server'),
                     latitude = float(self.request.get('latitude')),
                     longitude = float(self.request.get('longitude')),
                     specialName = self.request.get('specialName')).put()
-            memcache.delete('networks')
+            memcache.delete('available_networks')
             self.response.out.write('Network added !')
         except:
             self.response.out.write('Error adding network')

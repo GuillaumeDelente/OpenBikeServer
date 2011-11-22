@@ -6,12 +6,20 @@ from django.utils import simplejson
 from BeautifulSoup import *
 import logging, re
 from station import *
+from network import *
 
 class FetchStations(webapp.RequestHandler):
 
     def get(self):
         try:
-            result = urlfetch.fetch('http://www.vcub.fr/stations/plan', deadline = 10)
+            network = get_network();
+            if network is None:
+                logging.error(
+                    'No network set'
+                    + str(result.status_code))
+                self.error(200)
+                return
+            result = urlfetch.fetch(network.list_url, deadline = 10)
         except urlfetch.DownloadError:
             logging.error('Timeout')
             self.error(200)
