@@ -36,7 +36,6 @@ class FetchStationList(webapp.RequestHandler):
         else:
             stations = {}
             force_update = True
-        version_upgrade = False
 	#inserting
         new_stations = []
         try:
@@ -44,7 +43,6 @@ class FetchStationList(webapp.RequestHandler):
                 parsed_id = int(marker['number'])
                 new_ids.add(parsed_id)
                 if force_update or (parsed_id not in old_ids):
-                    version_upgrade = True
                     station = (Station(availableBikes = 0, 
                                        freeSlots = 0, 
                                        network = network_id, 
@@ -75,11 +73,5 @@ class FetchStationList(webapp.RequestHandler):
             save_stations_to_datastore(new_stations)
         memcache.set('stations', stations)
 
-	if version_upgrade:
-	#increment data version
-            network = Network.all().get()
-            network.data_version += 1
-            network.put()
-            memcache.set('network', network)
         self.response.out.write('ok')
         return
