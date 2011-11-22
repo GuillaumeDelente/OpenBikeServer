@@ -6,16 +6,17 @@ from fetchStations import *
 from networks import *
 from addNetwork import *
 from setMessage import *
+from stationsList import *
 
 application = webapp.WSGIApplication([('/private/update', Update),
                                       ('/private/addNetwork', AddNetwork),
                                       ('/private/setMessage', SetMessage),
                                       ('/queue/fetchStations', FetchStations),
                                       ('^/networks/?$', Networks),
-                                      ('^/stations/?$', Stations),
-                                      ('^/stations/\d+/?$', Stations),
+                                      ('^/stations/?$', StationsList),
+                                      ('^/stations/\d+/?$', StationsList),
                                       ('^/v(\d+)/stations/?$', Stations),
-                                      ('^/v(\d+)/stations/\d+/?$', Stations),],
+                                      ('^/v(\d+)/stations/list/?$', StationsList),],
                                      debug=True)
 
 def main():
