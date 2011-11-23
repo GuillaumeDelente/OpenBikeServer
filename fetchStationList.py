@@ -73,23 +73,24 @@ class FetchStationList(webapp.RequestHandler):
         memcache.set('stations', stations)
         if len(new_stations) != 0:
             save_stations_to_datastore(new_stations)
-            slaves = get_slaves()
-            if slaves is not None:
-                count = 0
-                how_many_by_slaves = int(math.ceil(len(stations) / len(slaves)))
-                ids = sorted(stations.keys())
-                network = get_network()
-                if network is None:
-                    return
-                for slave in slaves:
-                    post_data = {
-                        "stations_ids": '-'.join([str(id) for id in ids[count:count + how_many_by_slaves]]),
-                        "update_url": network.update_url,
-                        }
-                    urlfetch.fetch(url = slave.slave_url + '/setStationsIds', method = urlfetch.POST, payload = urllib.urlencode(post_data))
-                    count += how_many_by_slaves
-                    self.response.out.write('ok')
-                else:
-                    self.response.out.write('No slaves !')
+        ##### following goes in the if clause !!!!! #####
+        slaves = get_slaves()
+        if slaves is not None:
+            count = 0
+            how_many_by_slaves = int(math.ceil(len(stations) / len(slaves)))
+            ids = sorted(stations.keys())
+            network = get_network()
+            if network is None:
+                return
+            for slave in slaves:
+                post_data = {
+                    "stations_ids": '-'.join([str(id) for id in ids[count:count + how_many_by_slaves]]),
+                    "update_url": network.update_url,
+                    }
+                urlfetch.fetch(url = slave.slave_url + '/setStationsIds', method = urlfetch.POST, payload = urllib.urlencode(post_data))
+                count += how_many_by_slaves
+                self.response.out.write('ok')
+            else:
+                self.response.out.write('No slaves !')
         return
                 
