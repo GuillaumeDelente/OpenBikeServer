@@ -12,7 +12,6 @@ class Station(db.Model):
         return {"id": self.id, 
                 "availableBikes": self.availableBikes,
                 "freeSlots": self.freeSlots,
-                "open": self.open,
                 "network": self.network}
 
 
