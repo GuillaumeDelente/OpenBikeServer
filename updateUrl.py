@@ -5,7 +5,7 @@ class UpdateUrl(db.Model):
     updateUrl = db.StringProperty(required=True)
 
 def save_update_url_to_datastore(url):
-    db.put(UpdateUrl(url))
+    UpdateUrl(updateUrl = url).put()
 
 def get_update_url():
     update_url = memcache.get('update_url')
