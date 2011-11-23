@@ -11,8 +11,7 @@ class Update(webapp.RequestHandler):
         stations = get_stations()
         if stations is None:
             return
-        keys = stations.keys()
-        count = len(keys)
+        count = len(stations)
 	to = int(math.ceil(count / 10))
 	update_url = get_update_url()
         if update_url is None:
