@@ -11,7 +11,7 @@ def get_update_url():
     update_url = memcache.get('update_url')
     if update_url is not None:
         return update_url.updateUrl
-    update_url = Station.all().get()
+    update_url = UpdateUrl.all().get()
     if update_url is not None:
         memcache.set('update_url', update_url)
         return update_url.updateUrl
