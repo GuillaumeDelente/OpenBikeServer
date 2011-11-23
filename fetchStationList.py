@@ -2,6 +2,7 @@ from google.appengine.ext import webapp
 from google.appengine.api import memcache, taskqueue, urlfetch, mail, users, app_identity
 from BeautifulSoup import *
 from station import *
+from slave import *
 from network import *
 import logging, math, urllib
 
@@ -69,17 +70,26 @@ class FetchStationList(webapp.RequestHandler):
         closed_ids = old_ids.difference(new_ids)
         for closed_id in closed_ids:
             stations[closed_id].open = False
+        memcache.set('stations', stations)
         if len(new_stations) != 0:
             save_stations_to_datastore(new_stations)
-        memcache.set('stations', stations)
-
-        for slave in slaves:
-            post_data = {
-                "stations_ids": '-'.join([str(id) for id in ids[count:count + slave_count]]),
-                "update_url": network.update_url,
-                }
-            urlfetch.fetch(url = slave.slave_url + '/setStationsIds', method = urlfetch.POST, payload = urllib.urlencode(post_data))
-            count += slave_count
-        self.response.out.write('ok')
+            slaves = get_slaves()
+            if slaves is not None:
+                count = 0
+                how_many_by_slaves = int(math.ceil(len(stations) / len(slaves)))
+                ids = sorted(stations.keys())
+                network = get_network()
+                if network is None:
+                    return
+                for slave in slaves:
+                    post_data = {
+                        "stations_ids": '-'.join([str(id) for id in ids[count:count + how_many_by_slaves]]),
+                        "update_url": network.update_url,
+                        }
+                    urlfetch.fetch(url = slave.slave_url + '/setStationsIds', method = urlfetch.POST, payload = urllib.urlencode(post_data))
+                    count += how_many_by_slaves
+                    self.response.out.write('ok')
+                else:
+                    self.response.out.write('No slaves !')
         return
-        
+                

@@ -18,6 +18,7 @@ class AddSlave(webapp.RequestHandler):
     def post(self):
        try:
            Slave(slave_url = self.request.get('slave_url')).put()
+           memcache.delete('slaves')
            self.response.out.write('Slave added')
        except:
            self.response.out.write('Error adding slave')
