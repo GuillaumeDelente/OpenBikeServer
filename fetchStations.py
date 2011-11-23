@@ -28,37 +28,38 @@ class FetchStations(webapp.RequestHandler):
                               + id)
 
 	# Use a helper function to define the scope of the callback.
-        def create_callback(rpc, id):
-            return lambda: handle_result(rpc, id)
+        def create_callback(rpc, i):
+            return lambda: handle_result(rpc, i)
 
-	def update_station(id, content):
+        def update_station(stations, index, content):
             soup = BeautifulStoneSoup(content)
-            #try:
-            parsed_station = soup.station
-            to_update = stations[int(id)]
-            to_update.availableBikes = int(parsed_station.available.string)
-            to_update.freeSlots = int(parsed_station.free.string)
-            to_update.payment = bool(int(parsed_station.ticket.string))   
-            #except:
-            #   logging.error('error parsing station with content ' + content)
-            #  mail.send_mail("bug@" + app_identity.get_application_id() + ".appspotmail.com",
-            #                to="contact@openbike.fr",
-            #               subject="Parsing Error",
-            #              body='Error while parsing ' + id + ' with content ' + content)
-
+            try:
+                parsed_station = soup.station
+                stations[index].availableBikes = int(parsed_station.available.string)
+                stations[index].freeSlots = int(parsed_station.free.string)
+                stations[index].payment = bool(int(parsed_station.ticket.string))   
+            except:
+                mail.send_mail("bug@" + app_identity.get_application_id() + ".appspotmail.com",
+                               to="contact@openbike.fr",
+                               subject="Parsing Error",
+                               body='Error while parsing ' + str(station.id) + ' with content ' + content)
         url = self.request.get('update_url')
-        update_ids = [id for id in self.request.get('update_ids').split('-')]
+        result_from = int(self.request.get('from'))
+	from_index = result_from * 10
 	stations = get_stations()
         #Should not append as we check before launching update
         if stations is None:
             return
+        sub_stations = stations[from_index:from_index + 10]
 	rpcs = []
+        i = from_index	
         try:
-            for id in update_ids:
-                rpc = urlfetch.create_rpc(deadline = 10)
-                rpc.callback = create_callback(rpc, id)
-                urlfetch.make_fetch_call(rpc, url + '/' + id)
+            for station in sub_stations:
+                rpc = urlfetch.create_rpc()
+                rpc.callback = create_callback(rpc, i)
+                urlfetch.make_fetch_call(rpc, url + '/' + str(station.id))
                 rpcs.append(rpc)
+                i += 1
             for rpc in rpcs:
                 rpc.wait()
             memcache.set('stations', stations)

@@ -1,24 +1,14 @@
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from update import *
-from updateList import *
 from stations import *
-from stationsList import *
 from fetchStations import *
-from fetchStationList import *
-from setNetwork import *
-from setMessage import *
+from setStations import *
 
 application = webapp.WSGIApplication([('/private/update', Update),
-                                      ('/private/updateList', UpdateList),
-                                      ('/private/setNetwork', SetNetwork),
-                                      ('/private/setMessage', SetMessage),
-                                      ('/queue/fetchStationList', FetchStationList),
+                                      ('/setStationsIds', SetStations),
                                       ('/queue/fetchStations', FetchStations),
-                                      ('^/stations/?$', StationsList),
-                                      ('^/stations/\d+/?$', StationsList),
-                                      ('^/v(\d+)/stations/?$', Stations),
-                                      ('^/v(\d+)/stations/list/?$', StationsList),],
+                                      ('^/stations/?$', Stations),],
                                      debug=True)
 
 def main():

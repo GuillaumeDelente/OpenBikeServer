@@ -4,25 +4,15 @@ from google.appengine.ext import webapp
 from django.utils import simplejson
 from google.appengine.api import memcache
 from google.appengine.ext.webapp.util import run_wsgi_app
-from network import *
 from station import *
 
 class Stations(webapp.RequestHandler):
 
-    def get(self, api_version = 1, id = 0, full = False):
+    def get(self):
         stations = get_stations()
         if stations is None:
-            self.response.out.write(u"{\"message\": \"Les données sont momentanément indisponible, réessayez dans quelques instants.\",\"stations\": []}")
+            self.response.out.write("<html><body><p>No stations</p></body></html>")
         else:
-            self.response.headers["Content-Type"] = "application/json; charset=utf-8"
-            network = get_network()
-            message = network.message
-            response = ["{\"version\": ", str(network.data_version), ", "]
-            if len(message) != 0:
-                response.append("\"message\": \"")
-                response.append(message)
-                response.append("\", ")
-            response.append("\"stations\": ")
-            response.append(simplejson.dumps(
-                    [station.to_dict() for station in stations.values()]))
-            self.response.out.write(''.join(response))
+            self.response.out.write(
+                simplejson.dumps(
+                    [station.to_dict() for station in stations]))
