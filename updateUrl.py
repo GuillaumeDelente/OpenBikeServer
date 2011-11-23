@@ -4,7 +4,7 @@ from google.appengine.api import memcache
 class UpdateUrl(db.Model):
     updateUrl = db.StringProperty(required=True)
 
-def save_update_url_to_datastore(url):
+def save_update_url(url):
     UpdateUrl(updateUrl = url).put()
 
 def get_update_url():
