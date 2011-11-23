@@ -12,7 +12,7 @@ class Station(db.Model):
         return {"id": self.id, 
                 "availableBikes": self.availableBikes,
                 "freeSlots": self.freeSlots,
-                "network": self.network}
+                "payment": self.payment}
 
 
 def save_stations_to_datastore(stations):
