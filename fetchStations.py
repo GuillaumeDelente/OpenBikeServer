@@ -11,7 +11,7 @@ class FetchStations(webapp.RequestHandler):
         def handle_result(rpc, id):
             result = rpc.get_result()
             if result.status_code == 200:
-                update_station(id, result.content)
+                update_station(stations, id, result.content)
             elif result.status_code == 403:
                 logging.error('403 fetching station')
                 mail.send_mail("bug@" + app_identity.get_application_id() + ".appspotmail.com",
