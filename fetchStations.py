@@ -1,6 +1,7 @@
 from google.appengine.ext import webapp
 from google.appengine.api import memcache, urlfetch, mail, users, app_identity
 from google.appengine.ext.webapp.util import run_wsgi_app
+from django.utils import simplejson as json
 from BeautifulSoup import *
 import logging
 from station import *
@@ -8,10 +9,9 @@ from station import *
 class FetchStations(webapp.RequestHandler):
 
     def post(self):
-        def handle_result(rpc, id):
-            result = rpc.get_result()
+        def handle_result(result):
             if result.status_code == 200:
-                update_station(id, result.content)
+                update_stations(result.content)
             elif result.status_code == 403:
                 logging.error('403 fetching station')
                 mail.send_mail("bug@" + app_identity.get_application_id() + ".appspotmail.com",
@@ -27,7 +27,7 @@ class FetchStations(webapp.RequestHandler):
                               + ' for station ' 
                               + id)
 
-	def update_stations(content):
+        def update_stations(content):
             stations = get_stations()
             #should not append, already checked before update launch
             if stations is None:
