@@ -73,5 +73,13 @@ class FetchStationList(webapp.RequestHandler):
             save_stations_to_datastore(new_stations)
         memcache.set('stations', stations)
 
+        for slave in slaves:
+            post_data = {
+                "stations_ids": '-'.join([str(id) for id in ids[count:count + slave_count]]),
+                "update_url": network.update_url,
+                }
+            urlfetch.fetch(url = slave.slave_url + '/setStationsIds', method = urlfetch.POST, payload = urllib.urlencode(post_data))
+            count += slave_count
         self.response.out.write('ok')
         return
+        

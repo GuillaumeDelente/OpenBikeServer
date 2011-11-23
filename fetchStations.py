@@ -27,43 +27,21 @@ class FetchStations(webapp.RequestHandler):
                               + ' for station ' 
                               + id)
 
-	# Use a helper function to define the scope of the callback.
-        def create_callback(rpc, id):
-            return lambda: handle_result(rpc, id)
-
-	def update_station(id, content):
-            soup = BeautifulStoneSoup(content)
-            #try:
-            parsed_station = soup.station
-            to_update = stations[int(id)]
-            to_update.availableBikes = int(parsed_station.available.string)
-            to_update.freeSlots = int(parsed_station.free.string)
-            to_update.payment = bool(int(parsed_station.ticket.string))   
-            #except:
-            #   logging.error('error parsing station with content ' + content)
-            #  mail.send_mail("bug@" + app_identity.get_application_id() + ".appspotmail.com",
-            #                to="contact@openbike.fr",
-            #               subject="Parsing Error",
-            #              body='Error while parsing ' + id + ' with content ' + content)
-
-        url = self.request.get('update_url')
-        update_ids = [id for id in self.request.get('update_ids').split('-')]
-	stations = get_stations()
-        #Should not append as we check before launching update
-        if stations is None:
-            return
-	rpcs = []
-        try:
-            for id in update_ids:
-                rpc = urlfetch.create_rpc(deadline = 10)
-                rpc.callback = create_callback(rpc, id)
-                urlfetch.make_fetch_call(rpc, url + '/' + id)
-                rpcs.append(rpc)
-            for rpc in rpcs:
-                rpc.wait()
+	def update_stations(content):
+            stations = get_stations()
+            #should not append, already checked before update launch
+            if stations is None:
+                return
+#            try:
+            parsed_stations = json.loads(content)
+            for parsed_station in parsed_stations: 
+                station = stations[int(parsed_station['id'])]
+                if station is not None:
+                    station.availableBikes = parsed_station['availableBikes']
+                    station.freeSlots = parsed_station['freeSlots']
+                    station.payment = parsed_station['payment']
             memcache.set('stations', stations)
-        except urlfetch.DownloadError:
-            logging.error('Time out fetching stations')
-            self.error(500)
-            return
+
+        url = self.request.get('slave_url')
+        handle_result(urlfetch.fetch(url + '/stations'))
         self.response.out.write("<html><body><p>OK</p></body></html>")
