@@ -30,6 +30,7 @@ class SetStations(webapp.RequestHandler):
                 stations.append(Station(id = new_id))
             memcache.add("stations", stations)
             save_stations_to_datastore(stations)
-            memcache.add("update_url", self.request.get('update_url'))
+            update_url = self.request.get('update_url')
+            memcache.add("update_url", update_url)
             save_update_url_to_datastore(update_url)
             self.response.out.write("<html><body><p>Ok without cache</p></body></html>")
