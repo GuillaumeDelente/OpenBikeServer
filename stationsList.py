@@ -31,4 +31,5 @@ class StationsList(webapp.RequestHandler):
                 response.append("\"stations\": ")
                 response.append(simplejson.dumps(
                         [station.to_full_dict() for station in stations.values()]))
+                response.append("}")
                 self.response.out.write(''.join(response))
