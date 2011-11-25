@@ -8,7 +8,7 @@ from availableNetwork import *
 class AvailableNetworks(webapp.RequestHandler):
 
     def get(self, api_version = 1):
-        networks = get_available_networks()
+        networks = get_available_networks(api_version)
         if networks is None:
             self.error(500)
         else:

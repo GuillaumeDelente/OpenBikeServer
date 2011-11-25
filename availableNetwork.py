@@ -20,13 +20,27 @@ class AvailableNetwork(db.Model):
                 "longitude": self.longitude,
                 "specialName": self.specialName}
 
-def get_available_networks():
-    networks = memcache.get('available_networks')
+    def to_dict_v1(self):
+        return {"id": self.id, 
+                "name": self.name,
+                "server": self.server + "/stations/",
+                "city": self.city,
+                "latitude": self.latitude,
+                "longitude": self.longitude,
+                "specialName": self.specialName}
+
+def get_available_networks(version):
+    networks = memcache.get('available_networks' + str(version))
+    json = ""
     if networks is None:
         networks = AvailableNetwork.all().order('city').fetch(100)
-        json = simplejson.dumps(
-            [network.to_dict() for network in networks])
-        memcache.set('available_networks', json)
+        if version == 1:
+            json = simplejson.dumps(
+                [network.to_dict_v1() for network in networks])
+        else:
+            json = simplejson.dumps(
+                [network.to_dict() for network in networks])
+        memcache.set('available_networks' + str(version), json)
         return json
     else:
         return networks
