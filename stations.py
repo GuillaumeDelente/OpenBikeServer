@@ -12,7 +12,7 @@ class Stations(webapp.RequestHandler):
     def get(self, api_version = 1, id = 0, full = False):
         stations = get_stations()
         if stations is None:
-            self.response.out.write(u"{\"message\": \"Les données sont momentanément indisponible, réessayez dans quelques instants.\",\"stations\": []}")
+            self.response.out.write(u"{\"message\": \"Les données sont momentanément indisponible, réessayez dans quelques instants.\"}")
         else:
             self.response.headers["Content-Type"] = "application/json; charset=utf-8"
             status = get_status()
@@ -25,4 +25,5 @@ class Stations(webapp.RequestHandler):
             response.append("\"stations\": ")
             response.append(simplejson.dumps(
                     [station.to_dict() for station in stations.values()]))
+            response.append("}")
             self.response.out.write(''.join(response))

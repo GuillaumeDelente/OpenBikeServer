@@ -13,4 +13,8 @@ class AvailableNetworks(webapp.RequestHandler):
             self.error(500)
         else:
             self.response.headers["Content-Type"] = "application/json; charset=utf-8"
-            self.response.out.write(networks)
+            if (api_version == 1):
+                self.response.out.write(networks)
+            else:
+                response = ["{\"networks\": ", networks, "}"]
+                self.response.out.write(''.join(response))
