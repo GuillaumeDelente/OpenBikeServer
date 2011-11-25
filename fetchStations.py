@@ -25,7 +25,7 @@ class FetchStations(webapp.RequestHandler):
                               + ' for content : ' 
                               + result.content 
                               + ' for station ' 
-                              + id)
+                              + str(id))
 
 	# Use a helper function to define the scope of the callback.
         def create_callback(rpc, i):
