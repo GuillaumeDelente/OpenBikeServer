@@ -9,12 +9,14 @@ from fetchStationList import *
 from setNetwork import *
 from setMessage import *
 from addSlave import *
+from setupSlaves import *
 
 application = webapp.WSGIApplication([('/private/update', Update),
                                       ('/private/updateList', UpdateList),
                                       ('/private/setNetwork', SetNetwork),
                                       ('/private/setMessage', SetMessage),
                                       ('/private/addSlave', AddSlave),
+                                      ('/private/setupSlaves', SetupSlaves),
                                       ('/queue/fetchStationList', FetchStationList),
                                       ('/queue/fetchStations', FetchStations),
                                       ('^/stations/?$', StationsList),
