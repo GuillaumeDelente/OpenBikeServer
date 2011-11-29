@@ -15,8 +15,7 @@ class FetchStations(webapp.RequestHandler):
             network = get_network();
             if network is None:
                 logging.error(
-                    'No network set'
-                    + str(result.status_code))
+                    'No network set')
                 self.error(200)
                 return
             result = urlfetch.fetch(network.list_url, deadline = 10)
