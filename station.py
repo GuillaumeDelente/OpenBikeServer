@@ -52,3 +52,14 @@ def get_stations():
         return stations
     else:
         return None
+
+def get_mobile_stations():
+    stations = memcache.get('mobile_stations')
+    if stations is not None:
+        return stations
+    stations = get_stations()
+    mobiles = set()
+    for station in stations:
+        if 'Station Mobile' in station.name:
+            mobiles.add(station.id)
+    return mobiles
