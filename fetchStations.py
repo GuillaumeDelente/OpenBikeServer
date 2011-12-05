@@ -14,11 +14,11 @@ class FetchStations(webapp.RequestHandler):
         try:
             network = get_network();
             if network is None:
-                logging.error(
-                    'No network set')
+                logging.error('No network set')
                 self.error(200)
                 return
-            result = urlfetch.fetch(network.list_url, deadline = 10, method='POST', payload='xml=<gpsinfo><methodname>updateStations</methodname></gpsinfo>')
+            result = urlfetch.fetch(network.list_url, deadline = 10,
+                                    method='POST', payload='xml=<gpsinfo><methodname>updateStations</methodname></gpsinfo>')
         except urlfetch.DownloadError:
             logging.error('Timeout')
             self.error(200)
@@ -60,13 +60,14 @@ class FetchStations(webapp.RequestHandler):
                 station.availableBikes = bikes
                 station.freeSlots = slots
                 station.open = open
-                if (id is in mobile_stations):
-                    if (station.latitude != float(xml_station.lat.string) or
-                        station.longitude != float(xml_station.lng.string)):
+                if (id in mobile_stations):
+                    if (station.latitude != float(xml_station.lat.string) 
+                        or station.longitude != float(xml_station.lng.string)):
                         update_mobile = True
-                        latitude = float(xml_station.lat.string)
-                        longitude = float(xml_station.lng.string)
-                        address = unicode(xml_station.sadd.string).title()
+                        station.name = re.compile('[^a-zA-Z]*(.*)').match(unicode(xml_station.lb.string)).group(1).title()
+                        station.latitude = float(xml_station.lat.string)
+                        station.longitude = float(xml_station.lng.string)
+                        station.address = unicode(xml_station.sadd.string).title()
             else:
                 new_station = Station(id = id, 
                         name = re.compile('[^a-zA-Z]*(.*)').match(unicode(xml_station.lb.string)).group(1).title(),
@@ -86,7 +87,8 @@ class FetchStations(webapp.RequestHandler):
         if len(new_stations) != 0:
             db.put(new_stations)
         if update_mobile:
-            mobiles = [stations[id] for id in mobile_stations]
+            logging.error("Updating mobile stations")
+            mobiles = [stations.get(id) for id in mobile_stations]
             db.put(mobiles)
         to_remove = set(stations.keys()).difference(parsed_ids)
         for id in to_remove:

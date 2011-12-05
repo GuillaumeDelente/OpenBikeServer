@@ -59,6 +59,8 @@ def get_mobile_stations():
         return stations
     stations = get_stations()
     mobiles = set()
+    if stations is None:
+        return mobiles
     for station in stations:
         if 'Station Mobile' in station.name:
             mobiles.add(station.id)
