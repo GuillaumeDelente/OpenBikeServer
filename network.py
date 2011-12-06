@@ -6,6 +6,7 @@ class Network(db.Model):
     list_url = db.StringProperty(required=True)
     data_version = db.IntegerProperty(default = 0)
     message = db.StringProperty(default = '')
+    version = db.IntegerProperty(default = 1)
 
 def get_network():
     network = memcache.get('network')
