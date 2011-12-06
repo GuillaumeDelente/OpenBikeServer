@@ -10,6 +10,7 @@ class AvailableNetwork(db.Model):
     latitude = db.FloatProperty(required=True)
     longitude = db.FloatProperty(required=True)
     specialName = db.StringProperty(required=True)
+    version = db.IntegerProperty(default=1)
 
     def to_dict(self):
         return {"id": self.id, 
@@ -37,13 +38,13 @@ def get_available_networks(version):
         networks = AvailableNetwork.all().order('city').fetch(100)
         if version == 1:
             for network in networks:
-                if network.version >= version:
-                    list.add(network.to_dict_v1())
+                if version >= network.version:
+                    list.append(network.to_dict_v1())
             json = simplejson.dumps(list)
         else:
             for network in networks:
-                if network.version >= version:
-                    list.add(network.to_dict())
+                if version >= network.version:
+                    list.append(network.to_dict())
             json = simplejson.dumps(list)
         memcache.set('available_networks' + str(version), json)
         return json
