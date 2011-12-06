@@ -7,7 +7,6 @@ from availableNetwork import *
 class AddNetwork(webapp.RequestHandler):
 
     def get(self):
-        networks = get_available_networks()
         self.response.out.write("""
           <form action="/private/addNetwork" method="post">
             <div>id : <input type="text" name="id" /></div>
