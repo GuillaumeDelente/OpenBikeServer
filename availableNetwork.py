@@ -32,14 +32,19 @@ class AvailableNetwork(db.Model):
 def get_available_networks(version):
     networks = memcache.get('available_networks' + str(version))
     json = ""
+    list = []
     if networks is None:
         networks = AvailableNetwork.all().order('city').fetch(100)
         if version == 1:
-            json = simplejson.dumps(
-                [network.to_dict_v1() for network in networks])
+            for network in networks:
+                if network.version >= version:
+                    list.add(network.to_dict_v1())
+            json = simplejson.dumps(list)
         else:
-            json = simplejson.dumps(
-                [network.to_dict() for network in networks])
+            for network in networks:
+                if network.version >= version:
+                    list.add(network.to_dict())
+            json = simplejson.dumps(list)
         memcache.set('available_networks' + str(version), json)
         return json
     else:

@@ -16,6 +16,7 @@ class AddNetwork(webapp.RequestHandler):
             <div>latitude : <input type="text" name="latitude" /></div>
             <div>longitude : <input type="text" name="longitude" /></div>
             <div>specialName : <input type="text" name="specialName" /></div>
+            <div>Version  : <input type="text" name="version" /></div>
             <div><input type="submit" value="Save"></div>
           </form>
         </body>
@@ -24,12 +25,13 @@ class AddNetwork(webapp.RequestHandler):
     def post(self):
         try:
             AvailableNetwork(id = int(self.request.get('id')),
-                    name = self.request.get('name'), 
-                    city = self.request.get('city'),
-                    server = self.request.get('server'),
-                    latitude = float(self.request.get('latitude')),
-                    longitude = float(self.request.get('longitude')),
-                    specialName = self.request.get('specialName')).put()
+                             name = self.request.get('name'), 
+                             city = self.request.get('city'),
+                             server = self.request.get('server'),
+                             latitude = float(self.request.get('latitude')),
+                             longitude = float(self.request.get('longitude')),
+                             specialName = self.request.get('specialName'),
+                             version = int(self.request.get('version'))).put()
             memcache.delete('available_networks')
             self.response.out.write('Network added !')
         except:
